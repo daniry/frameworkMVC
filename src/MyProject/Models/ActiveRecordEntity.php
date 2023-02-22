@@ -87,6 +87,17 @@ abstract class ActiveRecordEntity
         }
     }
 
+    // метод удаления из бд
+    public function delete(): void
+    {
+        $db = Db::getInstance();
+        $db->query(
+            'DELETE FROM `' . static::getTableName() . '` WHERE id = :id',
+            [':id' => $this->id]
+        );
+        $this->id = null;
+    }
+
     private function update(array $mappedProperties): void
     {
         //здесь мы обновляем существующую запись в базе
