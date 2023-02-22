@@ -49,7 +49,7 @@ abstract class ActiveRecordEntity
 
 //    метод, который будет возвращать одну статью по id
 //      Этот метод вернёт либо один объект, если он найдётся в базе, либо null – что будет говорить об его отсутствии.
-    public static function getById(int $id) {
+    public static function getById(int $id): ?self {
         $db = Db::getInstance();
         $entities = $db->query(
             'SELECT * FROM `' . static::getTableName() . '` WHERE id=:id;',
@@ -136,6 +136,21 @@ abstract class ActiveRecordEntity
 
         $db = Db::getInstance();
         $db->query($sql, $params2values, static::class);
+    }
+
+    // метод, позволяющий находить записи в базе по какому-то одному столбцу
+    public static function findOneByColumn(string $columnName, $value): ?self
+    {
+        $db = Db::getInstance();
+        $result = $db->query(
+            'SELECT * FROM `' . static::getTableName() . '` WHERE `' . $columnName . '` = :value LIMIT 1;',
+            [':value' => $value],
+            static::class
+        );
+        if ($result === []) {
+            return null;
+        }
+        return $result[0];
     }
 
 }
