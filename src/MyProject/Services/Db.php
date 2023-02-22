@@ -1,11 +1,10 @@
 <?php
 
 namespace MyProject\Services;
+use MyProject\Exceptions\DbException;
 
 class Db
 {
-    // чтобы убедиться в том, что объект действительно создаётся дважды, создадим статическое свойство у класса
-    //    private static $instancesCount = 0;
 
     // статическое свойство, в котором будет храниться созданный объект
     private static $instance;
@@ -13,15 +12,18 @@ class Db
     private $pdo;
 
     private function __construct() {
-//        self::$instancesCount++;
         $dboptions = (require __DIR__ . '/../../settings.php')['db'];
 
-        $this->pdo = new \PDO(
-            'mysql:host=' . $dboptions['host'] . '; dbname=' . $dboptions['dbname'],
-            $dboptions['user'],
-            $dboptions['password']
-        );
-        $this->pdo->exec('SET NAMES UTF8');
+        try {
+            $this->pdo = new \PDO(
+                'mysql:host=' . $dboptions['host'] . ';dbname=' . $dboptions['dbname'],
+                $dboptions['user'],
+                $dboptions['password']
+            );
+            $this->pdo->exec('SET NAMES UTF8');
+        } catch (\PDOException $e) {
+            throw new DbException('Ошибка при подключении к базе данных: ' . $e->getMessage());
+        }
     }
 
     public function query(string $sql, $params =[], string $className = 'stdClass') {
